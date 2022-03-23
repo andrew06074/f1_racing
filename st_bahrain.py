@@ -9,7 +9,7 @@ import requests
 import pandas as pd
 import lxml
 
-st.markdown("<h1 style='text-align: center; color: black;'>Formula 1 - Bahrain Qualifier</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; color: white;'>Formula 1 - Bahrain Qualifier</h1>", unsafe_allow_html=True)
 
 #get data from page, clean for export
 url = 'https://www.formula1.com/en/results.html/2022/races/1124/bahrain/qualifying.html'
