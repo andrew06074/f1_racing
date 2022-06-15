@@ -12,6 +12,12 @@ def qualifying():
     import lxml
     import numpy as np
 
+
+    
+    st.markdown("<h1 style='text-align: center; color: white;'>Formula 1 - 2022</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: white;'>Qualifying overview</h2>", unsafe_allow_html=True)
+
+
     #create function to get link for avl data
     def get_races():
         f1_links = pd.read_csv('F1_Links.csv')
