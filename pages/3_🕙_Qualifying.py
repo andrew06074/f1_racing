@@ -104,8 +104,9 @@ def qualifying():
         #input and filtered df
         filtered_df = data_frame[['Driver',str(input_value),'Color']]
         filtered_df = filtered_df.replace(['DNF'],np.nan)
+        filtered_df = filtered_df.replace(['DNS'],np.nan)
         df_for_fig = filtered_df.dropna()
-        
+    
         # convert to timedelta...
         df_for_fig[input_value] = (
             df_for_fig[input_value]
