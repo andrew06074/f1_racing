@@ -119,7 +119,13 @@ def driver_page(data_frame):
     colors_list = driver_df['Color']
     #create vis
     fig = px.bar(driver_df, x="Winner", y="Number of wins",color='Winner',color_discrete_sequence=colors_list)
-    fig.update_layout(showlegend=False,title_text='Number of race wins', title_x=0.5,yaxis_title=None,xaxis_title=None)
+    fig.update_layout(autosize=False,width=400, height=200,margin=dict(
+        l=50,
+        r=50,
+        b=0,
+        t=50,
+        pad=4
+    ),showlegend=False,title_text='Number of race wins', title_x=0.5,yaxis_title=None,xaxis_title=None)
     fig.update_traces(width=.5)
 
     #create vis for fastlap
@@ -132,8 +138,30 @@ def driver_page(data_frame):
     fl_df = pd.merge(fl_df,color_con_df,how='left',on='Driver')
     #creating fig
     fl_fig = px.bar(fl_df, x="Driver", y="Number of fastest lap points",color='Driver',color_discrete_sequence=fl_df['Color'])
-    fl_fig.update_layout(showlegend=False,title_text='Points for fastest lap', title_x=0.5,yaxis_title=None,xaxis_title=None)
+    fl_fig.update_layout(autosize=False,width=400, height=200,margin=dict(
+        l=50,
+        r=50,
+        b=0,
+        t=50,
+        pad=4
+    ),showlegend=False,title_text='Points for fastest lap', title_x=0.5,yaxis_title=None,xaxis_title=None)
     fl_fig.update_traces(width=.5)
+
+    #create vis for drivers and points
+    colors_list = pts_df['Color']
+    pts_df_local = pts_df[['Driver','PTS','Color']]
+    pts_df_local.columns = ['Driver','Points','Color']
+    standings_fig = px.bar(pts_df_local,y='Driver',x='Points',color='Driver',color_discrete_sequence=colors_list)
+    standings_fig.update_layout(autosize=False,width=100, height=300,margin=dict(
+        l=150,
+        r=150,
+        b=50,
+        t=50,
+        pad=4
+    ),
+    showlegend=False,yaxis_title=None,title_text='Points this season',title_x=0.5,xaxis_title=None)
+    standings_fig.update_traces(width=1)
+    st.plotly_chart(standings_fig,use_container_width=True)
 
     col1, col2 = st.columns(2)
     with col1:
@@ -141,16 +169,6 @@ def driver_page(data_frame):
     with col2:
         st.plotly_chart(fl_fig,use_container_width=True)
     
-
-    #create vis for drivers and points
-    colors_list = pts_df['Color']
-    pts_df_local = pts_df[['Driver','PTS','Color']]
-    pts_df_local.columns = ['Driver','Points','Color']
-    standings_fig = px.bar(pts_df_local,y='Driver',x='Points',color='Driver',color_discrete_sequence=colors_list)
-    standings_fig.update_layout(showlegend=False,yaxis_title=None,title_text='Points this season',title_x=0.5,xaxis_title=None)
-    
-    st.plotly_chart(standings_fig,use_container_width=True)
-
 def team_page(data_frame):
     #team vis
     #get number of wins for each 'Winner'
@@ -163,17 +181,30 @@ def team_page(data_frame):
     colors_list = team_df['Color']
     #create vis
     team_fig = px.bar(team_df, x="Car", y="Number of wins",color='Car',color_discrete_sequence=colors_list)
-    team_fig.update_layout(showlegend=False,title_text='Team Wins', title_x=0.5,yaxis_title=None,xaxis_title=None)
+    team_fig.update_layout(autosize=False,width=200, height=200,margin=dict(
+        l=250,
+        r=250,
+        b=0,
+        t=50,
+        pad=4
+    ),showlegend=False,title_text='Team Wins', title_x=0.5,yaxis_title=None,xaxis_title=None)
     team_fig.update_traces(width=.5)
-    st.plotly_chart(team_fig,use_container_width=True)
+    
 
     #team pts vis
     team_pts_df = pd.merge(team_pts,colors,how='left',on='Team')
     team_pts_df.columns = ['Team','Points','Color']
     team_pts_fig = px.bar(team_pts_df,y='Team',x='Points',color='Team',color_discrete_sequence=team_pts_df['Color'])
-    team_pts_fig.update_layout(showlegend=False,yaxis_title=None,title_text='Points this season',title_x=0.5,xaxis_title=None)
+    team_pts_fig.update_layout(autosize=False,width=400, height=200,margin=dict(
+        l=50,
+        r=50,
+        b=0,
+        t=50,
+        pad=4
+    ),showlegend=False,yaxis_title=None,title_text='Points this season',title_x=0.5,xaxis_title=None)
+    
     st.plotly_chart(team_pts_fig,use_container_width=True)
-
+    st.plotly_chart(team_fig,use_container_width=True)
 
 def race_page(data_frame):
     #create vis for average laps
@@ -181,21 +212,39 @@ def race_page(data_frame):
     lap_vis_df.columns = ['Race','Average laptime (seconds)']
     lap_vis_df = lap_vis_df.sort_values(by='Average laptime (seconds)')
     fig_avg_times = px.line(lap_vis_df, x='Race', y='Average laptime (seconds)')
-    fig_avg_times.update_layout(showlegend=False, title_x=0.5,xaxis_title=None)
+    fig_avg_times.update_layout(autosize=False,width=400, height=200,margin=dict(
+        l=50,
+        r=50,
+        b=0,
+        t=50,
+        pad=4
+    ),showlegend=False, title_x=0.5,xaxis_title=None)
     #fig_avg_times.update_traces(width=.5)
 
     total_laps = data_frame[['Grand Prix','Laps']]
     total_laps = total_laps.sort_values(by='Laps')
     total_laps.columns = ['Race','Laps']
     fig_totallaps = px.line(total_laps,x='Race',y='Laps')
-    fig_totallaps.update_layout(xaxis_title=None)
+    fig_totallaps.update_layout(autosize=False,width=400, height=200,margin=dict(
+        l=50,
+        r=50,
+        b=0,
+        t=50,
+        pad=4
+    ),xaxis_title=None)
     
     time_df_for_fig = data_frame[['Grand Prix','Time']]
     time_df_for_fig.columns = ['Race','Time']
     time_df_for_fig['Time'] = pd.to_datetime(time_df_for_fig['Time'])
     time_df_for_fig = time_df_for_fig.sort_values(by='Time',ascending=True)
     time_fig = px.line(time_df_for_fig,x='Race',y='Time',markers=True)
-    time_fig.update_layout(title_text='Race Duration', title_x=0.5,xaxis_title=None,yaxis_title=None)
+    time_fig.update_layout(autosize=False,width=400, height=300,margin=dict(
+        l=50,
+        r=50,
+        b=0,
+        t=50,
+        pad=4
+    ),title_text='Race Duration', title_x=0.5,xaxis_title=None,yaxis_title=None)
     st.plotly_chart(time_fig, use_container_width=True)
 
 
