@@ -99,10 +99,11 @@ fastlap_df = load_fast_lap_data()
 #call team pts df
 team_pts = load_team_pts()
 
-#page title and info
-st.markdown("<h1 style='text-align: center; color: white;'>Welcome!</h1>", unsafe_allow_html=True)
-st.write('This site directly queries the [formula 1 website](https://www.formula1.com/en/results.html) and returns the appropiate data for cleaning and visulization.' )
-st.write('--------------------------------------')
+if st.checkbox('Show hows its done: '):
+    st.write('This site directly queries the [formula 1 website](https://www.formula1.com/en/results.html) and returns the appropiate data for cleaning and visulization.' )
+
+
+#page header
 st.markdown("<h3 style='text-align: center; color: white;'>2022 F1 Seasonal Overview</h3>", unsafe_allow_html=True)
 options = ['Driver Overview','Team Overview','Race Overview']
 select_scope = st.selectbox('Select a scope',options) 
@@ -261,7 +262,6 @@ if select_scope == 'Driver Overview':
     driver_page(data_frame)
 elif select_scope  == 'Team Overview':
     team_page(data_frame)
-
 elif select_scope == 'Race Overview':
     race_page(data_frame)
 
