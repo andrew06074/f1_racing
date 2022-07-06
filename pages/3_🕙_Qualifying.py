@@ -50,7 +50,8 @@ def qualifying():
 
     all_qual_data = get_all_quals(links)
 
-    selected_race = st.selectbox('Select a race: ',races)
+    with st.sidebar:
+     selected_race = st.selectbox('Select a race: ',races)
 
     links = get_races()
 
@@ -83,9 +84,11 @@ def qualifying():
     df_for_melt_info = data_frame[['Driver','Car','Color']]
 
     df_melt_merged = pd.merge(df_melted,df_for_melt_info,how='left',on='Driver')
+    df_melt_merged = df_melt_merged.sort_values(by=['variable','value'],ascending=[False,True])
+    
     def create_q1_split_fig():
         colors_list = data_frame['Color']
-        fig = px.bar(df_melt_merged,x=df_melt_merged['variable'],y=df_melt_merged['value'],facet_col=df_melt_merged['Driver'],facet_col_wrap=5,color='Driver',color_discrete_sequence=colors_list,labels=dict(value='',variable=''))
+        fig = px.bar(df_melt_merged,x=df_melt_merged['variable'],y=df_melt_merged['value'],facet_col=df_melt_merged['Driver'],facet_col_wrap=5,color='Driver',color_discrete_sequence=colors_list,labels=dict(value='',variable=''),facet_row_spacing=0.2,facet_col_spacing=0.05)
         fig.for_each_annotation(lambda a: a.update(text=a.text.split("=")[-1]))
         fig.update_layout(showlegend=False)
 
@@ -97,65 +100,72 @@ def qualifying():
     fig = create_q1_split_fig()
     st.plotly_chart(fig,use_container_width=True)
 
-    input_value = st.selectbox('Select a qualifying round', ('Q1','Q2','Q3'))
-
-    def update_figure(input_value):
-
-        #input and filtered df
-        filtered_df = data_frame[['Driver',str(input_value),'Color']]
-        filtered_df = filtered_df.replace(['DNF'],np.nan)
-        filtered_df = filtered_df.replace(['DNS'],np.nan)
-        df_for_fig = filtered_df.dropna()
-    
-        # convert to timedelta...
-        df_for_fig[input_value] = (
-            df_for_fig[input_value]
-            .str.extract(r"(?P<minute>[0-9]+):(?P<sec>[0-9]+).(?P<milli>[0-9]+)")
-            .apply(
-                lambda r: pd.Timestamp(year=1970,month=1,day=1,
-                                    minute=int(r.minute),second=int(r.sec),microsecond=int(r.milli) * 10 ** 3,
-                ),
-                axis=1,
-            )
-            - pd.to_datetime("1-jan-1970").replace(hour=0, minute=0, second=0, microsecond=0)
-            )
-
-        #normalize string text
-        def strfdelta(t, fmt="{minutes:02d}:{seconds:02d}.{milli:03d}"):
-            d = {}
-            d["minutes"], rem = divmod(t, 10 ** 9 * 60)
-            d["seconds"], d["milli"] = divmod(rem, 10 ** 9)
-            d["milli"] = d["milli"] // 10**6
-            return fmt.format(**d)
+    #initialize input variable
+    input_value = None
         
-        #figure
-        df_for_fig = df_for_fig.sort_values(by=input_value)
-        fig = px.line(df_for_fig,y='Driver',x=input_value,hover_name=df_for_fig[input_value].astype('int64').apply(strfdelta),markers=True,text=df_for_fig[input_value].astype('int64').apply(strfdelta))
-        fig.update_traces(textposition = "bottom right")
-        # fix up tick labels
-        ticks = pd.Series(range(df_for_fig[input_value].astype('int64').min() - 10 ** 10,df_for_fig[input_value].astype('int64').max(),10 ** 10,))
-        fig.update_layout(
-            xaxis={
-                "range": [
-                    df_for_fig[input_value].astype('int64').min(),
-                    df_for_fig[input_value].astype('int64').max(),
-                ],
-                "tickmode": "array",
-                "tickvals": ticks,
-                "ticktext": ticks.apply(strfdelta),
-                "side":"top",
-                "showgrid":False,
-                "showticklabels":False
-            },
-        yaxis={'categoryorder':'total descending',"showgrid":False},
-        autosize=False,
-        width=500,
-        height= 500,
-        plot_bgcolor ='rgba(0, 0, 0, 0)',
-        paper_bgcolor = 'rgba(0, 0, 0, 0)')
-        fig.update_layout(xaxis={'title':input_value})
-        return fig
-    fig = update_figure(input_value)
-    st.plotly_chart(fig,use_container_width=True)
+    with st.sidebar:
+        if st.checkbox('Show individual stint data: '):
+            input_value = st.selectbox('Select a qualifying round', ('Q1','Q2','Q3'))
+
+    
+    if input_value != None:
+        def update_figure(input_value):
+
+            #input and filtered df
+            filtered_df = data_frame[['Driver',str(input_value),'Color']]
+            filtered_df = filtered_df.replace(['DNF'],np.nan)
+            filtered_df = filtered_df.replace(['DNS'],np.nan)
+            df_for_fig = filtered_df.dropna()
+        
+            # convert to timedelta...
+            df_for_fig[input_value] = (
+                df_for_fig[input_value]
+                .str.extract(r"(?P<minute>[0-9]+):(?P<sec>[0-9]+).(?P<milli>[0-9]+)")
+                .apply(
+                    lambda r: pd.Timestamp(year=1970,month=1,day=1,
+                                        minute=int(r.minute),second=int(r.sec),microsecond=int(r.milli) * 10 ** 3,
+                    ),
+                    axis=1,
+                )
+                - pd.to_datetime("1-jan-1970").replace(hour=0, minute=0, second=0, microsecond=0)
+                )
+
+            #normalize string text
+            def strfdelta(t, fmt="{minutes:02d}:{seconds:02d}.{milli:03d}"):
+                d = {}
+                d["minutes"], rem = divmod(t, 10 ** 9 * 60)
+                d["seconds"], d["milli"] = divmod(rem, 10 ** 9)
+                d["milli"] = d["milli"] // 10**6
+                return fmt.format(**d)
+            
+            #figure
+            df_for_fig = df_for_fig.sort_values(by=input_value)
+            fig = px.line(df_for_fig,y='Driver',x=input_value,hover_name=df_for_fig[input_value].astype('int64').apply(strfdelta),markers=True,text=df_for_fig[input_value].astype('int64').apply(strfdelta))
+            fig.update_traces(textposition = "bottom right")
+            # fix up tick labels
+            ticks = pd.Series(range(df_for_fig[input_value].astype('int64').min() - 10 ** 10,df_for_fig[input_value].astype('int64').max(),10 ** 10,))
+            fig.update_layout(
+                xaxis={
+                    "range": [
+                        df_for_fig[input_value].astype('int64').min(),
+                        df_for_fig[input_value].astype('int64').max(),
+                    ],
+                    "tickmode": "array",
+                    "tickvals": ticks,
+                    "ticktext": ticks.apply(strfdelta),
+                    "side":"top",
+                    "showgrid":False,
+                    "showticklabels":False
+                },
+            yaxis={'categoryorder':'total descending',"showgrid":False},
+            autosize=False,
+            width=500,
+            height= 500,
+            plot_bgcolor ='rgba(0, 0, 0, 0)',
+            paper_bgcolor = 'rgba(0, 0, 0, 0)')
+            fig.update_layout(xaxis={'title':input_value})
+            return fig
+        fig = update_figure(input_value)
+        st.plotly_chart(fig,use_container_width=True)
 
 qualifying()
